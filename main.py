@@ -7,17 +7,31 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 0.1
-SHORT_BREAK_MIN = 0.2
-LONG_BREAK_MIN = 4
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
+LONG_BREAK_MIN = 20
 REPS = 0
+TIMER = None
 
 # ---------------------------- TIMER RESET ------------------------------- #
+
+
+def reset_timer():
+    window.after_cancel(TIMER)
+    check_mark_label.config(text="")
+    session_label.config(text="Timer", fg=GREEN)
+    canvas.itemconfig(timer_text, text="00:00")
+    global REPS
+    REPS = 0
+
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 
 
 def start_timer():
+    # Make the window jump above all
+    window.attributes("-topmost", True)
+
     global REPS
     REPS += 1
 
@@ -35,6 +49,10 @@ def start_timer():
         session_label.config(text="Work", fg=GREEN)
         count_down(work_sec)
 
+    # reset attribute
+    window.attributes("-topmost", False)
+
+
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
 
 
@@ -46,15 +64,21 @@ def count_down(count):
 
     canvas.itemconfig(timer_text, text=f"{count_minute}:{count_sec}")
     if count > 0:
-        window.after(1000, count_down, count-1)
+        global TIMER
+        TIMER = window.after(1000, count_down, count-1)
     else:
         start_timer()
+        global REPS
+        if REPS % 2 == 0:
+            current_checkmarks = check_mark_label.cget("text")
+            check_mark_label.config(text=current_checkmarks + "✔")
 
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = tkinter.Tk()
 window.title("Pomodoro")
 window.config(padx=100, pady=50, bg=YELLOW)
+
 
 canvas = tkinter.Canvas(width=200, height=224,
                         bg=YELLOW, highlightthickness=0)
@@ -79,17 +103,14 @@ start_button = tkinter.Button(text="Start",
                               command=start_timer)
 start_button.grid(column=0, row=2)
 
-check_label = tkinter.Label(text="✔",
-                            # font=(FONT_NAME, 12, "normal"),
-                            fg=GREEN,
-                            bg=YELLOW)
-check_label.grid(column=1, row=3)
+check_mark_label = tkinter.Label(fg=GREEN, bg=YELLOW)
+check_mark_label.grid(column=1, row=3)
 
 reset_button = tkinter.Button(text="Reset",
                               # font=(FONT_NAME, 12, "normal"),
                               # bg="white",
                               highlightthickness=0,
-                              command=None,)
+                              command=reset_timer)
 reset_button.grid(column=2, row=2)
 
 
