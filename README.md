@@ -35,7 +35,7 @@ Go to the project directory
   cd pomodoro-app
 ```
 
-Start the game
+Start the program
 
 ```bash
   python main.py
